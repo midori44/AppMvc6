@@ -50,7 +50,16 @@ namespace AppMvc6
                 .AddNpgsql()
                 .AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+                {
+                    // パスワードValidation設定
+                    options.Password.RequiredLength = 6;
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequireNonLetterOrDigit = false;
+                    options.User.RequireUniqueEmail = false;
+                })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -97,6 +106,17 @@ namespace AppMvc6
             app.UseIdentity();
 
             // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
+            app.UseTwitterAuthentication(options =>
+                {
+                    options.ConsumerKey = Configuration["Data:Twitter:ConsumerKey"];
+                    options.ConsumerSecret = Configuration["Data:Twitter:ConsumerSecret"];
+                })
+                .UseFacebookAuthentication(options =>
+                {
+                    options.AppId = Configuration["Data:Facebook:AppId"];
+                    options.AppSecret = Configuration["Data:Facebook:AppSecret"];
+                });
+
 
             app.UseMvc(routes =>
             {
