@@ -52,13 +52,16 @@ namespace AppMvc6
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                 {
-                    // パスワードValidation設定
+                    // パスワードValidation等の設定項目
                     options.Password.RequiredLength = 6;
                     options.Password.RequireDigit = false;
                     options.Password.RequireLowercase = false;
                     options.Password.RequireUppercase = false;
                     options.Password.RequireNonLetterOrDigit = false;
                     options.User.RequireUniqueEmail = false;
+                    options.SecurityStampValidationInterval = TimeSpan.FromDays(30);
+                    options.SignIn.RequireConfirmedEmail = false;
+                    options.SignIn.RequireConfirmedPhoneNumber = false;
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
