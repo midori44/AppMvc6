@@ -50,7 +50,7 @@ namespace AppMvc6
                 .AddNpgsql()
                 .AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
                 {
                     // パスワードValidation等の設定項目
                     options.Password.RequiredLength = 6;
@@ -63,7 +63,7 @@ namespace AppMvc6
                     options.SignIn.RequireConfirmedEmail = false;
                     options.SignIn.RequireConfirmedPhoneNumber = false;
                 })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddEntityFrameworkStores<ApplicationDbContext, int>()
                 .AddDefaultTokenProviders();
 
             services.AddMvc();
@@ -71,6 +71,8 @@ namespace AppMvc6
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
+
+            services.AddTransient<Repository.GroupRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -127,6 +129,7 @@ namespace AppMvc6
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
         }
 
         // Entry point for the application.
