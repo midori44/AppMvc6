@@ -4,15 +4,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using AppMvc6.Models;
-using AppMvc6.Repository;
+using AppMvc6.Services;
 
 namespace AppMvc6.Controllers
 {
     public class HomeController : Controller
     {
         [FromServices]
-        public GroupRepository groupRepository { get; set; }
+        public IGroupService groupService { get; set; }
         
+        public HomeController()
+        {
+        }
 
         public IActionResult Index()
         {
@@ -21,7 +24,7 @@ namespace AppMvc6.Controllers
 
         public IActionResult About()
         {
-            var users = groupRepository.GetUsers();
+            var users = groupService.GetUsers();
             ViewBag.user = users.Result;
             ViewData["Message"] = "Your application description page.";
 
@@ -30,6 +33,7 @@ namespace AppMvc6.Controllers
 
         public IActionResult Contact()
         {
+            groupService.Update();
             ViewData["Message"] = "Your contact page.";
 
             return View();
