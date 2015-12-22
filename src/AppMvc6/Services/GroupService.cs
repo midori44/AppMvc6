@@ -11,38 +11,36 @@ namespace AppMvc6.Services
     public interface IGroupService
     {
         Task<IEnumerable<ApplicationUser>> GetUsers();
-        void Update();
+        Task Update();
     }
 
     public class GroupService : IGroupService
     {
-        private readonly ApplicationDbContext dbContext;
+        private readonly IRepository<ApplicationUser> userRepository;
         private readonly IUnitOfWork unitOfWork;
-        public GroupService(ApplicationDbContext dbContext, IUnitOfWork unitOfWork)
+        public GroupService(IUnitOfWork unitOfWork)
         {
-            this.dbContext = dbContext;
             this.unitOfWork = unitOfWork;
+            userRepository = unitOfWork.Repository<ApplicationUser>();
         }
 
         public async Task<IEnumerable<ApplicationUser>> GetUsers()
         {
-            return await dbContext.Users.ToListAsync();
+            //return await userRepository.ToListAsync();
+            return await userRepository.Where(u => u.UserName != "").ToListAsync();
         }
 
-        public void Update()
+        public async Task Update()
         {
-            var user = dbContext.Users.FirstOrDefault();
+            var user = await userRepository.GetAsync(u => u.Id == 1);
             user.PhoneNumber = DateTime.Now.ToString();
-            dbContext.Attach(user);
-            dbContext.Entry(user).State = EntityState.Modified;
+            userRepository.Update(user);
 
-            var user2 = dbContext.Users.LastOrDefault();
+            var user2 = await userRepository.GetAsync(u => u.Id == 2);
             user2.PhoneNumber = "--";
-            dbContext.Attach(user2);
-            dbContext.Entry(user2).State = EntityState.Modified;
+            userRepository.Update(user);
 
-
-            unitOfWork.Commit();
+            await unitOfWork.CommitAsync();
         }
     }
 }

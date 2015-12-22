@@ -22,18 +22,23 @@ namespace AppMvc6.Controllers
             return View();
         }
 
-        public IActionResult About()
+        public async Task<IActionResult> About()
         {
-            var users = groupService.GetUsers();
-            ViewBag.user = users.Result;
+            var users = await groupService.GetUsers();
+            //ViewBag.user = users.Result;
+            foreach(var user in users)
+            {
+                Console.WriteLine(user.UserName);
+            }
+
             ViewData["Message"] = "Your application description page.";
 
             return View();
         }
 
-        public IActionResult Contact()
+        public async Task<IActionResult> Contact()
         {
-            groupService.Update();
+            await groupService.Update();
             ViewData["Message"] = "Your contact page.";
 
             return View();
