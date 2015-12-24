@@ -58,6 +58,8 @@ namespace AppMvc6.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
+                // これは、アカウント ロックアウトの基準となるログイン失敗回数を数えません。
+                // パスワード入力失敗回数に基づいてアカウントがロックアウトされるように設定するには、shouldLockout: true に変更してください。
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
@@ -77,11 +79,12 @@ namespace AppMvc6.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ModelState.AddModelError(string.Empty, "無効なログイン試行です。(Invalid login attempt.)");
                     return View(model);
                 }
             }
 
+            // ここに到達した場合は何らかの問題が発生しているので、フォームを再表示します。
             // If we got this far, something failed, redisplay form
             return View(model);
         }
@@ -104,16 +107,28 @@ namespace AppMvc6.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                //================================================================
+                // ユーザー作成(UserName = Email)
+                //var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    ScreenName = model.ScreenName
+                };
+                //================================================================
+
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    // アカウント確認とパスワード リセットを有効にする方法の詳細については、http://go.microsoft.com/fwlink/?LinkID=320771 を参照してください
+                    // このリンクを含む電子メールを送信します
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
                     // Send an email with this link
                     //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     //var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
-                    //await _emailSender.SendEmailAsync(model.Email, "Confirm your account",
-                    //    "Please confirm your account by clicking this link: <a href=\"" + callbackUrl + "\">link</a>");
+                    //await _emailSender.SendEmailAsync(model.Email, "Confirm your account(アカウントの確認)",
+                    //    "Please confirm your account by clicking this link(このリンクをクリックすることによってアカウントを確認してください): <a href=\"" + callbackUrl + "\">link</a>");
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation(3, "User created a new account with password.");
                     return RedirectToAction(nameof(HomeController.Index), "Home");
@@ -121,6 +136,7 @@ namespace AppMvc6.Controllers
                 AddErrors(result);
             }
 
+            // ここで問題が発生した場合はフォームを再表示します
             // If we got this far, something failed, redisplay form
             return View(model);
         }
@@ -143,6 +159,7 @@ namespace AppMvc6.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
+            // 外部ログイン プロバイダーへのリダイレクトを要求します
             // Request a redirect to the external login provider.
             var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
@@ -161,6 +178,7 @@ namespace AppMvc6.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
+            // ユーザーが既にログインを持っている場合、この外部ログイン プロバイダーを使用してユーザーをサインインします
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
             if (result.Succeeded)
@@ -178,11 +196,13 @@ namespace AppMvc6.Controllers
             }
             else
             {
+                // ユーザーがアカウントを持っていない場合、ユーザーにアカウントを作成するよう求めます
                 // If the user does not have an account, then ask the user to create an account.
                 ViewData["ReturnUrl"] = returnUrl;
                 ViewData["LoginProvider"] = info.LoginProvider;
                 var email = info.ExternalPrincipal.FindFirstValue(ClaimTypes.Email);
-                return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = email });
+                //return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = email });
+                return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { ScreenName = info.ProviderDisplayName });
             }
         }
 
@@ -200,13 +220,22 @@ namespace AppMvc6.Controllers
 
             if (ModelState.IsValid)
             {
+                // 外部ログイン プロバイダーからユーザーに関する情報を取得します
                 // Get the information about the user from the external login provider
                 var info = await _signInManager.GetExternalLoginInfoAsync();
                 if (info == null)
                 {
                     return View("ExternalLoginFailure");
                 }
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                //================================================================
+                // ユーザー作成(UserName = GUID)
+                //var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser
+                {
+                    UserName = Guid.NewGuid().ToString(),
+                    ScreenName = model.ScreenName
+                };
+                //================================================================
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
@@ -264,16 +293,19 @@ namespace AppMvc6.Controllers
                 var user = await _userManager.FindByNameAsync(model.Email);
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
+                    // ユーザーが存在しないことや未確認であることを公開しません。
                     // Don't reveal that the user does not exist or is not confirmed
                     return View("ForgotPasswordConfirmation");
                 }
 
+                // アカウント確認とパスワード リセットを有効にする方法の詳細については、http://go.microsoft.com/fwlink/?LinkID=320771 を参照してください
+                // このリンクを含む電子メールを送信します
                 // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
                 // Send an email with this link
                 //var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 //var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
                 //await _emailSender.SendEmailAsync(model.Email, "Reset Password",
-                //   "Please reset your password by clicking here: <a href=\"" + callbackUrl + "\">link</a>");
+                //   "Please reset your password by clicking here(こちらをクリックして、パスワードをリセットしてください): <a href=\"" + callbackUrl + "\">link</a>");
                 //return View("ForgotPasswordConfirmation");
             }
 
@@ -313,6 +345,7 @@ namespace AppMvc6.Controllers
             var user = await _userManager.FindByNameAsync(model.Email);
             if (user == null)
             {
+                // ユーザーが存在しないことを公開しません。
                 // Don't reveal that the user does not exist
                 return RedirectToAction(nameof(AccountController.ResetPasswordConfirmation), "Account");
             }
@@ -368,6 +401,7 @@ namespace AppMvc6.Controllers
                 return View("Error");
             }
 
+            // トークンを生成して送信します。
             // Generate the token and send it
             var code = await _userManager.GenerateTwoFactorTokenAsync(user, model.SelectedProvider);
             if (string.IsNullOrWhiteSpace(code))
@@ -394,6 +428,7 @@ namespace AppMvc6.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> VerifyCode(string provider, bool rememberMe, string returnUrl = null)
         {
+            // ユーザーがユーザー名/パスワードまたは外部ログイン経由でログイン済みであることが必要です。
             // Require that the user has already logged in via username/password or external login
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
@@ -415,6 +450,10 @@ namespace AppMvc6.Controllers
                 return View(model);
             }
 
+            // 次のコードは、2 要素コードに対するブルート フォース攻撃を防ぎます。
+            // ユーザーが誤ったコードを入力した回数が指定の回数に達すると、ユーザー アカウントは
+            // 指定の時間が経過するまでロックアウトされます。
+            // アカウント ロックアウトの設定は IdentityConfig の中で構成できます。
             // The following code protects for brute force attacks against the two factor codes.
             // If a user enters incorrect codes for a specified amount of time then the user account
             // will be locked out for a specified amount of time.

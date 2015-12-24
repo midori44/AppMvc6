@@ -51,7 +51,7 @@ namespace AppMvc6.Models
         //public virtual ICollection<Tag> Tags { get; set; }
         //public virtual ICollection<Topic> Topics { get; set; }
 
-        //public Status State { get; set; } = Status.Public;
+        public Status State { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
         public DateTime Modified { get; set; }
 

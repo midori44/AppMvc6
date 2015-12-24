@@ -9,6 +9,11 @@ namespace AppMvc6.ViewModels.Account
     public class RegisterViewModel
     {
         [Required]
+        [MaxLength(24)]
+        [Display(Name = "ニックネーム")]
+        public string ScreenName { get; set; }
+
+        [Required]
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }

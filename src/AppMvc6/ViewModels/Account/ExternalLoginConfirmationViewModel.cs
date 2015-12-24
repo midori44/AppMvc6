@@ -8,8 +8,12 @@ namespace AppMvc6.ViewModels.Account
 {
     public class ExternalLoginConfirmationViewModel
     {
+        //[Required]
+        //[EmailAddress]
+        //public string Email { get; set; }
+
         [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+        [Display(Name = "ニックネーム")]
+        public string ScreenName { get; set; }
     }
 }

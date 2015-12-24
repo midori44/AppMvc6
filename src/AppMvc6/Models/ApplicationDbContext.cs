@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Data.Entity;
 
@@ -17,6 +19,8 @@ namespace AppMvc6.Models
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Entity<Group>().HasIndex(g => g.Account).IsUnique();
+
             base.OnModelCreating(builder);
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.

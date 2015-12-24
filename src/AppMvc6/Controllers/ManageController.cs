@@ -9,6 +9,7 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.Extensions.Logging;
 using AppMvc6.Models;
 using AppMvc6.Services;
+using AppMvc6.ViewModels;
 using AppMvc6.ViewModels.Manage;
 
 namespace AppMvc6.Controllers
@@ -38,28 +39,50 @@ namespace AppMvc6.Controllers
 
         //
         // GET: /Manage/Index
-        [HttpGet]
-        public async Task<IActionResult> Index(ManageMessageId? message = null)
-        {
-            ViewData["StatusMessage"] =
-                message == ManageMessageId.ChangePasswordSuccess ? "Your password has been changed."
-                : message == ManageMessageId.SetPasswordSuccess ? "Your password has been set."
-                : message == ManageMessageId.SetTwoFactorSuccess ? "Your two-factor authentication provider has been set."
-                : message == ManageMessageId.Error ? "An error has occurred."
-                : message == ManageMessageId.AddPhoneSuccess ? "Your phone number was added."
-                : message == ManageMessageId.RemovePhoneSuccess ? "Your phone number was removed."
-                : "";
+        //[HttpGet]
+        //public async Task<IActionResult> Index(ManageMessageId? message = null)
+        //{
+        //    ViewData["StatusMessage"] =
+        //        message == ManageMessageId.ChangePasswordSuccess ? "Your password has been changed."
+        //        : message == ManageMessageId.SetPasswordSuccess ? "Your password has been set."
+        //        : message == ManageMessageId.SetTwoFactorSuccess ? "Your two-factor authentication provider has been set."
+        //        : message == ManageMessageId.Error ? "An error has occurred."
+        //        : message == ManageMessageId.AddPhoneSuccess ? "Your phone number was added."
+        //        : message == ManageMessageId.RemovePhoneSuccess ? "Your phone number was removed."
+        //        : "";
 
+        //    var user = await GetCurrentUserAsync();
+        //    var model = new IndexViewModel
+        //    {
+        //        HasPassword = await _userManager.HasPasswordAsync(user),
+        //        PhoneNumber = await _userManager.GetPhoneNumberAsync(user),
+        //        TwoFactor = await _userManager.GetTwoFactorEnabledAsync(user),
+        //        Logins = await _userManager.GetLoginsAsync(user),
+        //        BrowserRemembered = await _signInManager.IsTwoFactorClientRememberedAsync(user)
+        //    };
+        //    return View(model);
+        //}
+
+        public async Task<ActionResult> Index()
+        {
             var user = await GetCurrentUserAsync();
-            var model = new IndexViewModel
+            var logins = await _userManager.GetLoginsAsync(user);
+
+            var viewModel = new ManageIndexViewModel
             {
-                HasPassword = await _userManager.HasPasswordAsync(user),
-                PhoneNumber = await _userManager.GetPhoneNumberAsync(user),
-                TwoFactor = await _userManager.GetTwoFactorEnabledAsync(user),
-                Logins = await _userManager.GetLoginsAsync(user),
-                BrowserRemembered = await _signInManager.IsTwoFactorClientRememberedAsync(user)
+                Email = user.Email,
+                HasPassword = (user.PasswordHash != null),
+                ScreenName = user.ScreenName,
+                IconPath = user.IconPath,
+                Note = user.Note,
+                LoginFacebook = logins.FirstOrDefault(l => l.LoginProvider == "Faceboox"),
+                LoginTwitter = logins.FirstOrDefault(l => l.LoginProvider == "Twitter"),
+                CanRemove = ((user.Email != null && user.PasswordHash != null) || logins.Count > 1)
             };
-            return View(model);
+
+            //Session["UserName"] = user.Name;
+            //Session["UserIconPath"] = user.IconPath;
+            return View(viewModel);
         }
 
         //
@@ -99,6 +122,7 @@ namespace AppMvc6.Controllers
             {
                 return View(model);
             }
+            // トークンを生成して送信します。
             // Generate the token and send it
             var user = await GetCurrentUserAsync();
             var code = await _userManager.GenerateChangePhoneNumberTokenAsync(user, model.PhoneNumber);
@@ -144,6 +168,7 @@ namespace AppMvc6.Controllers
         public async Task<IActionResult> VerifyPhoneNumber(string phoneNumber)
         {
             var code = await _userManager.GenerateChangePhoneNumberTokenAsync(await GetCurrentUserAsync(), phoneNumber);
+            // 電話番号を確認するために SMS プロバイダー経由で SMS を送信します。
             // Send an SMS to verify the phone number
             return phoneNumber == null ? View("Error") : View(new VerifyPhoneNumberViewModel { PhoneNumber = phoneNumber });
         }
@@ -168,8 +193,9 @@ namespace AppMvc6.Controllers
                     return RedirectToAction(nameof(Index), new { Message = ManageMessageId.AddPhoneSuccess });
                 }
             }
+            // ここに到達した場合は何らかの問題が発生しているので、フォームを再表示します。
             // If we got this far, something failed, redisplay the form
-            ModelState.AddModelError(string.Empty, "Failed to verify phone number");
+            ModelState.AddModelError(string.Empty, "Failed to verify phone number(電話番号を確認できませんでした)");
             return View(model);
         }
 
@@ -289,6 +315,7 @@ namespace AppMvc6.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult LinkLogin(string provider)
         {
+            // 現在のユーザーのログインをリンクするために外部ログイン プロバイダーへのリダイレクトを要求します。
             // Request a redirect to the external login provider to link a login for the current user
             var redirectUrl = Url.Action("LinkLoginCallback", "Manage");
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, User.GetUserId());
