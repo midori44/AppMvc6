@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using AppMvc6.Models;
 using AppMvc6.Services;
+using Microsoft.AspNet.Session;
+using Microsoft.AspNet.Http;
 
 namespace AppMvc6
 {
@@ -75,6 +77,9 @@ namespace AppMvc6
 
             services.AddTransient<IUnitOfWork, UnitOfWork>()
                .AddTransient<IGroupService, GroupService>();
+
+            services.AddCaching();
+            services.AddSession();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -125,6 +130,7 @@ namespace AppMvc6
                 });
 
 
+            app.UseSession(); // UseMvcより先に記述
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

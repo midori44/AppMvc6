@@ -1,11 +1,16 @@
 ﻿@using System.Security.Claims
+@using AppMvc6.Infrastructure;
 
 @if (User.IsSignedIn())
 {
+    var session = new MySession(Context);
+    string screenName = session["UserScreenName"] ?? (session["UserScreenName"] = User.ToApplicationUser().ScreenName);
+    string iconPath = session["UserIconPath"] ?? (session["UserIconPath"] = User.ToApplicationUser().IconPath);
+
     <form asp-controller="Account" asp-action="LogOff" method="post" id="logoutForm" class="navbar-right">
         <ul class="nav navbar-nav navbar-right">
             <li>
-                <a asp-controller="Manage" asp-action="Index" title="Manage">Hello @User.GetUserName()!</a>
+                <a asp-controller="Manage" asp-action="Index" title="Manage">Hello @screenName!</a>
             </li>
             <li>
                 <button type="submit" class="btn btn-link navbar-btn navbar-link">Log off</button>

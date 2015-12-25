@@ -15,8 +15,11 @@ namespace AppMvc6.Models
     public class ApplicationUser : IdentityUser<int>
     {
         public string ScreenName { get; set; }
-        public string IconPath { get; set; }
+        public string IconPath { get; set; } = "img/user/default.png";
         public string Note { get; set; }
+
+        //public DateTime Created { get; set; } = DateTime.Now;
+        //public DateTime Modified { get; set; }
     }
 
     public static class ApplicationUserExtention
@@ -34,10 +37,8 @@ namespace AppMvc6.Models
         /// </summary>
         public static async Task<ApplicationUser> ToApplicationUserAsync(this ClaimsPrincipal user)
         {
-            int userId = int.Parse(user.GetUserId());
-            return await UserManager().Users.FirstOrDefaultAsync(u => u.Id == userId);
+            return await UserManager().FindByIdAsync(user.GetUserId());
         }
-
 
         private static UserManager<ApplicationUser> UserManager()
         {
