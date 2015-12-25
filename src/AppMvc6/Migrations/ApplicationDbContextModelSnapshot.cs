@@ -30,8 +30,6 @@ namespace AppMvc6.Migrations
 
                     b.Property<bool>("EmailConfirmed");
 
-                    b.Property<string>("IconPath");
-
                     b.Property<bool>("LockoutEnabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd");
@@ -42,15 +40,11 @@ namespace AppMvc6.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasAnnotation("MaxLength", 256);
 
-                    b.Property<string>("Note");
-
                     b.Property<string>("PasswordHash");
 
                     b.Property<string>("PhoneNumber");
 
                     b.Property<bool>("PhoneNumberConfirmed");
-
-                    b.Property<string>("ScreenName");
 
                     b.Property<string>("SecurityStamp");
 
@@ -68,69 +62,6 @@ namespace AppMvc6.Migrations
                         .HasAnnotation("Relational:Name", "UserNameIndex");
 
                     b.HasAnnotation("Relational:TableName", "AspNetUsers");
-                });
-
-            modelBuilder.Entity("AppMvc6.Models.Group", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Account");
-
-                    b.Property<int>("Activity");
-
-                    b.Property<int>("Area");
-
-                    b.Property<string>("AreaDetail");
-
-                    b.Property<DateTime>("Created");
-
-                    b.Property<bool>("DayFri");
-
-                    b.Property<bool>("DayMon");
-
-                    b.Property<bool>("DayOther");
-
-                    b.Property<bool>("DaySat");
-
-                    b.Property<bool>("DaySun");
-
-                    b.Property<bool>("DayThu");
-
-                    b.Property<bool>("DayTue");
-
-                    b.Property<bool>("DayWed");
-
-                    b.Property<string>("Facebook");
-
-                    b.Property<string>("HiringComment");
-
-                    b.Property<string>("IconPath");
-
-                    b.Property<bool>("IsStudent");
-
-                    b.Property<DateTime>("Modified");
-
-                    b.Property<string>("Name");
-
-                    b.Property<bool>("NowHiring");
-
-                    b.Property<int?>("NumberOfMembers");
-
-                    b.Property<string>("Profile");
-
-                    b.Property<int>("State");
-
-                    b.Property<string>("Twitter");
-
-                    b.Property<int>("Voice");
-
-                    b.Property<string>("WebSite");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Account")
-                        .IsUnique();
                 });
 
             modelBuilder.Entity("Microsoft.AspNet.Identity.EntityFramework.IdentityRole<int>", b =>

@@ -11,12 +11,11 @@ using AppMvc6.Models;
 using AppMvc6.Services;
 using AppMvc6.ViewModels;
 using AppMvc6.ViewModels.Manage;
-using Microsoft.AspNet.Http;
 
 namespace AppMvc6.Controllers
 {
     [Authorize]
-    public class ManageController : BaseController
+    public class ManageController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -25,11 +24,11 @@ namespace AppMvc6.Controllers
         private readonly ILogger _logger;
 
         public ManageController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender,
-            ISmsSender smsSender,
-            ILoggerFactory loggerFactory)
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        IEmailSender emailSender,
+        ISmsSender smsSender,
+        ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -81,6 +80,8 @@ namespace AppMvc6.Controllers
                 CanRemove = ((user.Email != null && user.PasswordHash != null) || logins.Count > 1)
             };
 
+            //Session["UserName"] = user.Name;
+            //Session["UserIconPath"] = user.IconPath;
             return View(viewModel);
         }
 
@@ -363,13 +364,9 @@ namespace AppMvc6.Controllers
             Error
         }
 
-        private async new Task<ApplicationUser> GetCurrentUserAsync()
+        private async Task<ApplicationUser> GetCurrentUserAsync()
         {
-            //return await _userManager.FindByIdAsync(HttpContext.User.GetUserId());
-
-            var user = await _userManager.FindByIdAsync(HttpContext.User.GetUserId());
-            SetSession(user);
-            return user;
+            return await _userManager.FindByIdAsync(HttpContext.User.GetUserId());
         }
 
         #endregion
