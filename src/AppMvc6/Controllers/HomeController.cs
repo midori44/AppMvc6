@@ -10,10 +10,8 @@ using System.Security.Claims;
 
 namespace AppMvc6.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
-        private int UserId => int.Parse(User.GetUserId());
-
         [FromServices]
         public IGroupService groupService { get; set; }
 
@@ -54,8 +52,14 @@ namespace AppMvc6.Controllers
 
             return View();
         }
-        public IActionResult About()
+        //public IActionResult About()
+        //{
+        //    var user = GetCurrentUser();
+        //    return View();
+        //}
+        public async Task<IActionResult> About()
         {
+            var user = await GetCurrentUserAsync();
             return View();
         }
         //[HttpPost]
