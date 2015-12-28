@@ -1,0 +1,137 @@
+﻿@using AppMvc6.Models
+@model AppMvc6.ViewModels.MyPageIndexViewModel
+@{
+    ViewBag.Title = "マイページ";
+}
+@section Styles {
+    <style type="text/css">
+        .week {
+            display: block;
+            float: left;
+            color: #fff;
+            width: 20px;
+            height: 20px;
+            margin: 1px;
+            background: #333;
+            text-align: center;
+            border-radius: 4px;
+            opacity: 0.1;
+        }
+
+        .week-sun {
+            background: #ff3333;
+        }
+
+        .week-sat {
+            background: #0094ff;
+        }
+
+        .week-other {
+            width: 50px;
+            background: #666666;
+        }
+
+        .week-on {
+            opacity: 1;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-sm-8 col-md-9">
+        <h2>マイページ<a href="~/manage/index" class="btn btn-sm btn-default pull-right"><span class="glyphicon glyphicon-cog"></span> アカウント設定</a></h2>
+
+        <h3><span class="glyphicon glyphicon-briefcase"></span> 本日の予定</h3>
+        <ul class="media-list">
+            @foreach (var practice in Model.PracticeViewModels)
+            {
+                var group = Model.Groups.First(g => g.Id == practice.GroupId);
+
+                <li style="padding:10px 0; border-top:1px solid #ccc;">
+                    <div>
+                        <img src="~/@group.IconPath" class="img-rounded" style="max-height:28px; max-width:28px;" />
+                        @group.Name
+                    </div>
+                    <div>
+                        <span class="glyphicon glyphicon-time"></span>
+                        <small>@Html.RouteLink(practice.DisplayDateTime(), "MyGroup", new { account = group.Account, controller = "Practice", action = "Details", id = practice.Id }, new { style = "color:inherit" })</small>
+                    </div>
+                    <div class="h4">
+                        @Html.RouteLink(practice.Title, "MyGroup", new { account = group.Account, controller = "Practice", action = "Details", id = practice.Id })
+                    </div>
+                    <div>
+                        場所 ： @practice.Place
+                    </div>
+                </li>
+            }
+        </ul>
+        @if (!Model.PracticeViewModels.Any())
+        {
+            <p>本日(@DateTime.Today.ToShortDateString())の予定はありません</p>
+        }
+        <h3><span class="glyphicon glyphicon-home"></span> マイグループ</h3>
+        <ul class="media-list">
+            @foreach (var group in Model.Groups)
+            {
+                <li style="padding:10px 0; border-top:1px solid #ccc;">
+                    <h4 class="media-heading" style="line-height:1.4em;">
+                        @switch (group.Voice)
+                        {
+                            case Voice.Mixed:
+                                <span class="label label-success">混声</span>
+                                break;
+                            case Voice.Female:
+                                <span class="label label-danger">女声</span>
+                                break;
+                            case Voice.Male:
+                                <span class="label label-primary">男声</span>
+                                break;
+                            case Voice.Child:
+                                <span class="label label-info">児童</span>
+                                break;
+                            case Voice.Other:
+                            default:
+                                break;
+                        }
+                        @if (group.IsStudent)
+                        {
+                            <span class="label label-warning">学生</span>
+                        }
+                        <span>@Html.RouteLink(group.Name, "MyGroup", new { account = group.Account, controller = "Practice" })</span>
+                    </h4>
+                    <div class="media-left" style="min-width: 74px; text-align: center;">
+                        <a href="@Url.RouteUrl("MyGroup", new { account = group.Account, controller = "Practice" })">
+                            <img src="~/@group.IconPath" class="img-rounded" style="max-width: 64px; max-height: 64px;" />
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <div>
+                            @group.Area @group.AreaDetail
+                        </div>
+                        <div>
+                            <div style="float:left; margin-right:10px">
+                                <span class="week @((group.DayMon) ? "week-on" : "")">月</span>
+                                <span class="week @((group.DayTue) ? "week-on" : "")">火</span>
+                                <span class="week @((group.DayWed) ? "week-on" : "")">水</span>
+                                <span class="week @((group.DayThu) ? "week-on" : "")">木</span>
+                                <span class="week @((group.DayFri) ? "week-on" : "")">金</span>
+                                <span class="week week-sat @((group.DaySat) ? "week-on" : "")">土</span>
+                                <span class="week week-sun @((group.DaySun) ? "week-on" : "")">日</span>
+                                <span class="week week-other @((group.DayOther) ? "week-on" : "")">不定期</span>
+                            </div>
+                            <div style="float:left">
+                                <span><span class="glyphicon glyphicon-time"></span> @group.Activity.Name()</span>
+                                <span style="margin-left:10px"><span class="glyphicon glyphicon-user"></span> @group.NumberOfMembers 人</span>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+        @if (!Model.Groups.Any())
+        {
+            <p>参加中のグループはありません</p>
+        }
+    </div>
+
+</div>

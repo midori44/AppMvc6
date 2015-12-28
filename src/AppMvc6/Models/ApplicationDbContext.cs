@@ -11,7 +11,18 @@ namespace AppMvc6.Models
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
     {
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Entry> Entries { get; set; }
+        public DbSet<Enquete> Enquetes { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<Group> Groups { get; set; }
+        public DbSet<Member> Members { get; set; }
+        public DbSet<Practice> Practices { get; set; }
+        public DbSet<ProfileIcon> ProfileIcons { get; set; }
+        public DbSet<Song> Songs { get; set; }
+
+        public DbSet<SongPractice> SongPractice { get; set; }
+
 
         public ApplicationDbContext()
         {
@@ -20,6 +31,7 @@ namespace AppMvc6.Models
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Group>().HasIndex(g => g.Account).IsUnique();
+            
 
             base.OnModelCreating(builder);
             // Customize the ASP.NET Identity model and override the defaults if needed.

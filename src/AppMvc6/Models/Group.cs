@@ -43,10 +43,10 @@ namespace AppMvc6.Models
         //public virtual ICollection<Chat> Chats { get; set; }
         //public virtual ICollection<Event> Events { get; set; }
         //public virtual ICollection<Favorite> Favs { get; set; }
-        //public virtual ICollection<Member> Members { get; set; }
+        public virtual ICollection<Member> Members { get; set; }
         //public virtual ICollection<Movie> Movies { get; set; }
         //public virtual ICollection<Practice> Practices { get; set; }
-        //public virtual ICollection<ProfileIcon> ProfileIcons { get; set; }
+        public virtual ICollection<ProfileIcon> ProfileIcons { get; set; }
         //public virtual ICollection<Song> Songs { get; set; }
         //public virtual ICollection<Tag> Tags { get; set; }
         //public virtual ICollection<Topic> Topics { get; set; }

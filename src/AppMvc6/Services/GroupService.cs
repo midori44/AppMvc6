@@ -13,6 +13,11 @@ namespace AppMvc6.Services
     public interface IGroupService
     {
         Task<IPagedList<Group>> GetGroupsPageAsync(Page page);
+        Task<IEnumerable<Group>> GetGroupsAsync(int userId);
+
+        IEnumerable<Group> GetGroups(int userId, int num);
+        IPagedList<Group> GetGroupsPage(Page page, int userId);
+
     }
 
     public class GroupService : IGroupService
@@ -20,11 +25,13 @@ namespace AppMvc6.Services
         private readonly IUnitOfWork unitOfWork;
         //private readonly IRepository<ApplicationUser> userRepository;
         private readonly IRepository<Group> groupRepository;
+        private readonly IRepository<Member> memberRepository;
         public GroupService(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
             //userRepository = unitOfWork.Repository<ApplicationUser>();
             groupRepository = unitOfWork.Repository<Group>();
+            memberRepository = unitOfWork.Repository<Member>();
         }
 
         //public async Task<IEnumerable<ApplicationUser>> GetUsers()
@@ -53,6 +60,27 @@ namespace AppMvc6.Services
                 .OrderByDescending(g => g.Created);
 
             return await groups.ToPagedListAsync(page);
+        }
+
+        public IEnumerable<Group> GetGroups(int userId, int num)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPagedList<Group> GetGroupsPage(Page page, int userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<Group>> GetGroupsAsync(int userId)
+        {
+            var groups = memberRepository
+                .Where(m => m.UserId == userId && m.State == Status.Public)
+                .OrderByDescending(m => m.Created)
+                .Select(m => m.Group)
+                .Where(g => g.State == Status.Public);
+
+            return await groups.ToListAsync();
         }
     }
 }

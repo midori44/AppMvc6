@@ -18,8 +18,15 @@ namespace AppMvc6.Models
         public string IconPath { get; set; } = "img/user/default.png";
         public string Note { get; set; }
 
-        //public DateTime Created { get; set; } = DateTime.Now;
-        //public DateTime Modified { get; set; }
+        //public virtual ICollection<Article> Articles { get; set; }
+        //public virtual ICollection<Chat> Chats { get; set; }
+        //public virtual ICollection<Comment> Comments { get; set; }
+        //public virtual ICollection<Favorite> Favs { get; set; }
+        public virtual ICollection<Member> Members { get; set; }
+        public virtual ICollection<ProfileIcon> ProfileIcons { get; set; }
+
+        public DateTime Created { get; set; } = DateTime.Now;
+        public DateTime Modified { get; set; }
     }
 
     public static class ApplicationUserExtention
@@ -42,7 +49,10 @@ namespace AppMvc6.Models
 
         private static UserManager<ApplicationUser> UserManager()
         {
-            return (UserManager<ApplicationUser>)new HttpContextAccessor().HttpContext.ApplicationServices.GetService(typeof(UserManager<ApplicationUser>));
+            return (UserManager<ApplicationUser>)new HttpContextAccessor()
+                .HttpContext
+                .ApplicationServices
+                .GetService(typeof(UserManager<ApplicationUser>));
         }
     }
 }

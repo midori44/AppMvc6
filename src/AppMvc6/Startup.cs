@@ -76,7 +76,11 @@ namespace AppMvc6
 
 
             services.AddTransient<IUnitOfWork, UnitOfWork>()
-               .AddTransient<IGroupService, GroupService>();
+                //.AddSingleton<IHostingEnvironment,HostingEnvironment>()
+                .AddTransient<IGroupService, GroupService>()
+                .AddTransient<IProfileIconService, ProfileIconService>()
+                .AddTransient<IUserService, UserService>()
+                .AddTransient<IPracticeService, PracticeService>();
 
             services.AddCaching();
             services.AddSession();
